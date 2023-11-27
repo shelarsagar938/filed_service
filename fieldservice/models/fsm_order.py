@@ -173,6 +173,7 @@ class FSMOrder(models.Model):
 
     # Planning
     person_id = fields.Many2one("fsm.person", string="Assigned To", index=True)
+    user_id = fields.Many2one("res.users", string='Technician')
     person_phone = fields.Char(related="person_id.phone", string="Worker Phone")
     scheduled_date_start = fields.Datetime(string="Scheduled Start (ETA)")
     scheduled_duration = fields.Float(help="Scheduled duration of the work in" " hours")
@@ -235,6 +236,26 @@ class FSMOrder(models.Model):
     type = fields.Many2one("fsm.order.type")
 
     internal_type = fields.Selection(related="type.internal_type")
+
+    image = fields.Image(string='Start Image', attachment=True)
+    image_end = fields.Image(string = 'End Image', attachment=True)
+    @api.onchange('image')
+    def onchange_image(self):
+        """
+        Update the start time when an image is uploaded.
+        """
+        if self.image:
+            # Set the start time to the current date and time
+            self.date_start = fields.Datetime.now()
+
+    @api.onchange('image_end')
+    def onchange_image_end(self):
+        """
+        Update the start time when an image is uploaded.
+        """
+        if self.image_end:
+            # Set the start time to the current date and time
+            self.date_end = fields.Datetime.now()
 
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
